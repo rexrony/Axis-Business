@@ -1,0 +1,125 @@
+<?php
+
+function theme_settings_page()
+{
+    ?>
+	    <div class="wrap">
+	    <h1>Custom Theme Panel</h1>
+	    <form method="POST" action="<?php bloginfo('siteurl'); ?>/wp-admin/themes.php?page=theme-panel" id="file-form" enctype="multipart/form-data">
+	        <?php
+	            settings_fields("section");
+	            do_settings_sections("theme-options");      
+	            submit_button(); 
+	        ?>          
+	    </form>
+		</div>
+	<?php
+}
+function display_twitter_element()
+{
+	?>
+    	<input type="text" name="twitter_url" id="twitter_url" value="<?php echo get_option('twitter_url'); ?>" />
+    <?php
+}
+
+function display_facebook_element()
+{
+	?>
+    	<input type="text" name="facebook_url" id="facebook_url" value="<?php echo get_option('facebook_url'); ?>" />
+    <?php
+}
+function display_animate_element()
+{
+	?>
+		<input type="checkbox" name="css_animate" value="1" <?php checked(1, get_option('css_animate'), true); ?> /> 
+	<?php
+}
+function copyright_element(){
+    ?>
+    <input type="text" name="copyright_text" id="copyright_text" value="<?php echo get_option('copyright_text'); ?>" />
+    <?php
+}
+
+/***********Display Field in Theme Option**********/
+function display_theme_panel_fields()
+{
+	add_settings_section("section", "All Settings", null, "theme-options");
+	
+	add_settings_field("twitter_url", "Twitter Profile Url", "display_twitter_element", "theme-options", "section");
+    add_settings_field("facebook_url", "Facebook Profile Url", "display_facebook_element", "theme-options", "section");
+    add_settings_field("theme_layout", "Do you want the Animate CSS?", "display_animate_element", "theme-options", "section");
+    add_settings_field("copyright_text", "Copyright Text", "copyright_element", "theme-options", "section");
+
+
+    register_setting("section", "twitter_url");
+    register_setting("section", "facebook_url");
+    register_setting("section", "css_animate");
+    register_setting("section", "copyright_text");
+    
+    
+    add_settings_field("logo", "Logo", "logo_display", "theme-options", "section");  
+    register_setting("section", "logo", "handle_logo_upload");
+    
+    /**Footer Logo**
+    add_settings_field("footerlogo", "Footer Logo", "footer_logo", "theme-options", "section");  
+    register_setting("section", "footerlogo", "handle_logo_upload2");*/
+}
+
+add_action("admin_init", "display_theme_panel_fields");
+
+
+function logo_display()
+{
+    ?>
+        <input type="hidden" name="logo" value="<?php echo get_option('logo'); ?>" readonly /><input type="file" name="logo" id="imgupload" style="display: block;" />
+  <a id="OpenImgUpload" class="button button-primary">Image Upload</a>
+        <?php echo get_option('logo'); ?>
+   <?php
+}
+function handle_logo_upload()
+{
+    if(isset($_FILES["logo"]) && !empty($_FILES['logo']['name']))
+    {
+        $urls = wp_handle_upload($_FILES["logo"], array('test_form' => FALSE));
+        $temp = $urls["url"];
+       return $temp;
+    }
+ elseif(isset($_FILES["logo"]) && empty($_FILES['logo']['name'])){
+  $urls = $_POST["logo"];
+  return $urls;
+ }
+   return $option;
+} 
+
+/*************************
+function footer_logo()
+{
+	?>
+        <input type="file" name="footer_logo" /> 
+        <?php echo get_option('footer_logo'); ?>
+   <?php
+}
+
+function handle_logo_upload2()
+{
+	if(!empty($_FILES["demo-file"]["tmp_name"]))
+	{
+		$urls = wp_handle_upload($_FILES["logo"], array('test_form' => FALSE));
+	    $temp = $urls["url"];
+	    return $temp;   
+	}
+	  
+	return $option;
+}
+***/
+
+
+function add_theme_menu_item()
+{
+	add_menu_page("Theme Panel", "My Theme Panel", "manage_options", "theme-panel", "theme_settings_page", null, 99);
+}
+
+add_action("admin_menu", "add_theme_menu_item");
+
+
+?>
